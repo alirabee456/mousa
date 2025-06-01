@@ -67,7 +67,7 @@ def add_text_to_image(image, name, job, image_name):
     try:
         img = image.copy()
         draw = ImageDraw.Draw(img)
-        font = load_arabic_font(font_size=120)
+        font = load_arabic_font(font_size=40)
 
         name_text = prepare_arabic_text(name)
         job_text = prepare_arabic_text(job)

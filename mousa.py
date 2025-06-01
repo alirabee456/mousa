@@ -4,6 +4,7 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 import io
 import base64
+import os
 
 # تهيئة حالة الجلسة
 if 'show_new_page' not in st.session_state:
@@ -44,18 +45,29 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
+# دالة لتحميل خط يدعم العربية تلقائيًا
+def load_arabic_font(font_size=100):
+    font_paths = [
+        "C:\\Windows\\Fonts\\trado.ttf",  # Traditional Arabic - Windows
+        "C:\\Windows\\Fonts\\arial.ttf",  # Arial - Windows
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
+        "/System/Library/Fonts/Supplemental/Arial.ttf",  # macOS
+    ]
+    for path in font_paths:
+        if os.path.exists(path):
+            try:
+                return ImageFont.truetype(path, font_size)
+            except:
+                continue
+    st.warning("تعذر تحميل خط عربي. سيتم استخدام الخط الافتراضي.")
+    return ImageFont.load_default()
+
 # دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):
     try:
         img = image.copy()
         draw = ImageDraw.Draw(img)
-
-        # تحميل خط يدعم العربية
-        try:
-            font = ImageFont.truetype("Amiri-Regular.ttf", size=100)
-        except:
-            st.warning("تعذر تحميل الخط العربي. سيتم استخدام الخط الافتراضي.")
-            font = ImageFont.load_default()
+        font = load_arabic_font(font_size=120)
 
         name_text = prepare_arabic_text(name)
         job_text = prepare_arabic_text(job)

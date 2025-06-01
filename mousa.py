@@ -4,7 +4,6 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 import io
 import base64
-import os
 
 # تهيئة حالة الجلسة
 if 'show_new_page' not in st.session_state:
@@ -22,20 +21,12 @@ if 'show_balloons' not in st.session_state:
 if 'play_audio' not in st.session_state:
     st.session_state.play_audio = False
 
-
 # دالة لمعالجة النصوص العربية
-# تعديل دالة معالجة النص العربي
 def prepare_arabic_text(text):
     if not text.strip():
         return ""
-    
-    # إعدادات إضافية لتحسين التشكيل
-    arabic_reshaper.config.forget_letters = True
-    arabic_reshaper.config.language = 'Arabic'
-    
     reshaped = arabic_reshaper.reshape(text)
     return get_display(reshaped)
-
 
 # دالة لتشغيل الصوت باستخدام HTML5
 def audio_autoplay(sound_file):
@@ -53,50 +44,34 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-
-# دالة معدلة لتنسيق النص مع padding مختلف لكل صورة
+# دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):
     try:
         img = image.copy()
         draw = ImageDraw.Draw(img)
-        
-        # حساب حجم الخط ديناميكياً بناءً على حجم الصورة
-        base_font_size = int(img.height / 8)  # يمكن تعديل القيمة حسب الحاجة
-        
-        # استخدام خط عربي مخصص (يجب توفير ملف الخط)
+
+        # تحميل خط يدعم العربية
         try:
-            font_path = "fonts/NotoNaskhArabic-Regular.ttf"  # أو أي خط عربي آخر
-            font = ImageFont.truetype(font_path, base_font_size)
-        except Exception as e:
-            st.warning(f"خطأ في تحميل الخط العربي: {e}")
-            try:
-                font = ImageFont.truetype("arial.ttf", base_font_size)
-            except:
-                font = ImageFont.load_default()
-                font.size = base_font_size
+            font = ImageFont.truetype("Amiri-Regular.ttf", size=100)
+        except:
+            st.warning("تعذر تحميل الخط العربي. سيتم استخدام الخط الافتراضي.")
+            font = ImageFont.load_default()
 
-        # بقية الكود...
-
-        # تحضير النصوص
         name_text = prepare_arabic_text(name)
         job_text = prepare_arabic_text(job)
 
-        # قياسات الصورة
         img_width, img_height = img.size
 
-        # حساب حجم النصوص
         name_bbox = draw.textbbox((0, 0), name_text, font=font)
         job_bbox = draw.textbbox((0, 0), job_text, font=font)
 
         name_width = name_bbox[2] - name_bbox[0]
         name_height = name_bbox[3] - name_bbox[1]
-
         job_width = job_bbox[2] - job_bbox[0]
         job_height = job_bbox[3] - job_bbox[1]
 
         spacing = 20
 
-        # تحديد قيمة padding بناءً على الصورة المختارة
         padding_values = {
             "M1.jpg": 1200,
             "M2.jpg": 940,
@@ -106,14 +81,11 @@ def add_text_to_image(image, name, job, image_name):
 
         top_padding = padding_values.get(image_name, 570)
 
-        # حساب المواضع
         name_x = (img_width - name_width) // 2
         name_y = top_padding
-
         job_x = (img_width - job_width) // 2
         job_y = name_y + name_height + spacing
 
-        # رسم النصوص
         draw.text((name_x, name_y), name_text, font=font, fill="black")
         draw.text((job_x, job_y), job_text, font=font, fill="black")
 
@@ -123,12 +95,9 @@ def add_text_to_image(image, name, job, image_name):
         st.error(f"حدث خطأ أثناء إضافة النص: {str(e)}")
         return image
 
-
-# قائمة بأسماء ملفات الصور المحلية
+# قائمة الصور
 IMAGE_FILES = ["M1.jpg", "M2.jpg", "M5.jpg", "M4.jpg"]
 
-
-# الصفحة الرئيسية
 # الصفحة الرئيسية
 def main_page():
     st.title("تهنئة الحج 🕋")
@@ -139,7 +108,6 @@ def main_page():
     </div>
     """, unsafe_allow_html=True)
 
-
     try:
         st.image("k2.jpg", width=300)
     except:
@@ -147,19 +115,16 @@ def main_page():
 
     if st.button("اضغط لإنشاء التهنئة"):
         st.session_state.show_new_page = True
-        st.session_state.play_audio = True  # تشغيل الصوت عند الدخول للصفحة
+        st.session_state.play_audio = True
         st.rerun()
-
 
 # صفحة إنشاء التهنئة
 def create_page():
-    # تشغيل الصوت طالما play_audio True
     if st.session_state.get('play_audio', False):
         audio_autoplay("aud.mp3")
 
     st.title("إنشاء التهنئة")
 
-    # حقول الإدخال
     col1, col2 = st.columns(2)
     with col1:
         st.session_state.name = st.text_input('ادخل اسمك', value=st.session_state.name)
@@ -168,7 +133,6 @@ def create_page():
 
     st.subheader("اختر تصميم التهنئة")
 
-    # عرض الصور في أعمدة
     cols = st.columns(4)
     for i, img_file in enumerate(IMAGE_FILES):
         try:
@@ -183,7 +147,6 @@ def create_page():
                 if st.button(f"اختر تصميم {i + 1}"):
                     st.session_state.selected_image = img_file
                     st.success(f"تم اختيار التصميم {i + 1}")
-
                     st.session_state.final_image = add_text_to_image(
                         Image.open(img_file),
                         st.session_state.name,
@@ -202,7 +165,6 @@ def create_page():
         img_bytes = io.BytesIO()
         st.session_state.final_image.save(img_bytes, format='PNG')
 
-        # زر الحفظ مع تأثير البالونات وإيقاف الصوت
         if st.download_button(
                 label="حفظ التهنئة",
                 data=img_bytes.getvalue(),
@@ -210,9 +172,8 @@ def create_page():
                 mime="image/png"
         ):
             st.session_state.show_balloons = True
-            st.session_state.play_audio = False  # إيقاف الصوت عند الحفظ
+            st.session_state.play_audio = False
 
-    # عرض البالونات عند الحفظ
     if st.session_state.show_balloons:
         st.balloons()
         st.session_state.show_balloons = False
@@ -222,8 +183,7 @@ def create_page():
         st.session_state.selected_image = None
         st.rerun()
 
-
-# التحكم في عرض الصفحات
+# عرض الصفحة المناسبة
 if st.session_state.show_new_page:
     create_page()
 else:

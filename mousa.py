@@ -58,6 +58,7 @@ def add_text_to_image(image, name, job, image_name):
         try:
             font = ImageFont.truetype("arial.ttf", 800)
         except:
+            font = ImageFont.load_default()
             font.size=800
 
         # تحضير النصوص

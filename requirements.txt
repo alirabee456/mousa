@@ -1,4 +1,5 @@
 streamlit
-Pillow
-arabic-reshaper
-python-bidi
+python-
+pillow>=10.0.0
+arabic-reshaper>=3.0.0
+python-bidi>=0.4.2

@@ -4,6 +4,7 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 import io
 import base64
+import os
 
 # تهيئة حالة الجلسة
 if 'show_new_page' not in st.session_state:
@@ -21,14 +22,88 @@ if 'show_balloons' not in st.session_state:
 if 'play_audio' not in st.session_state:
     st.session_state.play_audio = False
 
-# دالة لمعالجة النصوص العربية
+# دالة معالجة النصوص العربية المعدلة
 def prepare_arabic_text(text):
     if not text.strip():
         return ""
+    
+    # إعدادات معالجة النص العربي
     reshaped = arabic_reshaper.reshape(text)
     return get_display(reshaped)
 
-# دالة لتشغيل الصوت باستخدام HTML5
+# دالة إضافة النص إلى الصورة (مطورة)
+def add_text_to_image(image, name, job, image_name):
+    try:
+        # زيادة دقة الصورة إذا كانت صغيرة
+        if image.width < 1500:
+            img = image.resize((1500, int(1500 * (image.height/image.width))), Image.Resampling.LANCZOS)
+        else:
+            img = image.copy()
+            
+        draw = ImageDraw.Draw(img)
+        
+        # حساب حجم الخط ديناميكياً
+        font_size = max(60, int(img.height / 10))  # حد أدنى 60
+        
+        # قائمة بالخطوط المحتملة (بدون استخدام ملفات خارجية)
+        arabic_fonts = [
+            "Arial",
+            "Times New Roman",
+            "Traditional Arabic",
+            "Microsoft Sans Serif",
+            "Segoe UI"
+        ]
+        
+        font = None
+        for font_name in arabic_fonts:
+            try:
+                font = ImageFont.truetype(font_name, font_size)
+                break
+            except:
+                continue
+                
+        if font is None:
+            font = ImageFont.load_default()
+            font.size = font_size
+        
+        # تحضير النصوص
+        name_text = prepare_arabic_text(name)
+        job_text = prepare_arabic_text(job)
+        
+        # تحديد المواقع لكل صورة
+        positions = {
+            "M1.jpg": {"name_y": img.height - 400, "job_y": img.height - 250},
+            "M2.jpg": {"name_y": img.height - 350, "job_y": img.height - 200},
+            "M5.jpg": {"name_y": img.height - 300, "job_y": img.height - 150},
+            "M4.jpg": {"name_y": img.height - 450, "job_y": img.height - 300}
+        }
+        
+        pos = positions.get(image_name, {
+            "name_y": img.height - 300,
+            "job_y": img.height - 150
+        })
+        
+        # حساب عرض النص
+        name_width = draw.textlength(name_text, font=font)
+        job_width = draw.textlength(job_text, font=font)
+        
+        # إضافة ظل للنص لتحسين الوضوح
+        shadow_color = "#AAAAAA"
+        draw.text(((img.width - name_width)/2 + 2, pos["name_y"] + 2), name_text, font=font, fill=shadow_color)
+        draw.text(((img.width - job_width)/2 + 2, pos["job_y"] + 2), job_text, font=font, fill=shadow_color)
+        
+        # إضافة النص الأساسي
+        text_color = "#000000"
+        draw.text(((img.width - name_width)/2, pos["name_y"]), name_text, font=font, fill=text_color)
+        draw.text(((img.width - job_width)/2, pos["job_y"]), job_text, font=font, fill=text_color)
+        
+        return img
+        
+    except Exception as e:
+        st.error(f"حدث خطأ أثناء إضافة النص: {str(e)}")
+        return image
+
+# دالة تشغيل الصوت
 def audio_autoplay(sound_file):
     try:
         with open(sound_file, "rb") as f:
@@ -37,63 +112,11 @@ def audio_autoplay(sound_file):
         audio_html = f"""
         <audio autoplay>
         <source src="data:audio/mp3;base64,{audio_b64}" type="audio/mp3">
-        Your browser does not support the audio element.
         </audio>
         """
         st.markdown(audio_html, unsafe_allow_html=True)
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
-
-# دالة لتنسيق النص على الصورة
-def add_text_to_image(image, name, job, image_name):
-    try:
-        img = image.copy()
-        draw = ImageDraw.Draw(img)
-
-        # تحميل خط يدعم العربية
-        try:
-            font = ImageFont.truetype("Amiri-Regular.ttf", size=100)
-        except:
-            st.warning("تعذر تحميل الخط العربي. سيتم استخدام الخط الافتراضي.")
-            font = ImageFont.load_default()
-
-        name_text = prepare_arabic_text(name)
-        job_text = prepare_arabic_text(job)
-
-        img_width, img_height = img.size
-
-        name_bbox = draw.textbbox((0, 0), name_text, font=font)
-        job_bbox = draw.textbbox((0, 0), job_text, font=font)
-
-        name_width = name_bbox[2] - name_bbox[0]
-        name_height = name_bbox[3] - name_bbox[1]
-        job_width = job_bbox[2] - job_bbox[0]
-        job_height = job_bbox[3] - job_bbox[1]
-
-        spacing = 20
-
-        padding_values = {
-            "M1.jpg": 1200,
-            "M2.jpg": 940,
-            "M5.jpg": 570,
-            "M4.jpg": 700
-        }
-
-        top_padding = padding_values.get(image_name, 570)
-
-        name_x = (img_width - name_width) // 2
-        name_y = top_padding
-        job_x = (img_width - job_width) // 2
-        job_y = name_y + name_height + spacing
-
-        draw.text((name_x, name_y), name_text, font=font, fill="black")
-        draw.text((job_x, job_y), job_text, font=font, fill="black")
-
-        return img
-
-    except Exception as e:
-        st.error(f"حدث خطأ أثناء إضافة النص: {str(e)}")
-        return image
 
 # قائمة الصور
 IMAGE_FILES = ["M1.jpg", "M2.jpg", "M5.jpg", "M4.jpg"]
@@ -103,8 +126,8 @@ def main_page():
     st.title("تهنئة الحج 🕋")
     st.markdown("""
     <div style='text-align: left; font-size: 1.2rem;'>
-    تصميم وبرمجة موسي علي كالو  تلفزيون جدة <br>
-    للتواصل واتساب  0503081873
+    تصميم وبرمجة موسي علي كالو - تلفزيون جدة<br>
+    للتواصل واتساب 0503081873
     </div>
     """, unsafe_allow_html=True)
 
@@ -118,7 +141,7 @@ def main_page():
         st.session_state.play_audio = True
         st.rerun()
 
-# صفحة إنشاء التهنئة
+# صفحة الإنشاء
 def create_page():
     if st.session_state.get('play_audio', False):
         audio_autoplay("aud.mp3")
@@ -156,11 +179,11 @@ def create_page():
         except FileNotFoundError:
             st.error(f"ملف {img_file} غير موجود")
         except Exception as e:
-            st.error(f"حدث خطأ أثناء تحميل الصورة: {str(e)}")
+            st.error(f"حدث خطأ: {str(e)}")
 
     if st.session_state.get('final_image'):
         st.subheader("التصميم النهائي")
-        st.image(st.session_state.final_image, width=500)
+        st.image(st.session_state.final_image, width=800)  # عرض أكبر للصورة
 
         img_bytes = io.BytesIO()
         st.session_state.final_image.save(img_bytes, format='PNG')
@@ -183,7 +206,7 @@ def create_page():
         st.session_state.selected_image = None
         st.rerun()
 
-# عرض الصفحة المناسبة
+# التشغيل الرئيسي
 if st.session_state.show_new_page:
     create_page()
 else:

@@ -56,10 +56,9 @@ def add_text_to_image(image, name, job, image_name):
 
         # استخدام خط مناسب للعربية
         try:
-            font = ImageFont.truetype("arial.ttf", 250)
+            font = ImageFont.truetype("arial.ttf", 800)
         except:
-            font = ImageFont.load_default()
-            font.size=250
+            font.size=800
 
         # تحضير النصوص
         name_text = prepare_arabic_text(name)

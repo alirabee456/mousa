@@ -24,9 +24,15 @@ if 'play_audio' not in st.session_state:
 
 
 # دالة لمعالجة النصوص العربية
+# تعديل دالة معالجة النص العربي
 def prepare_arabic_text(text):
     if not text.strip():
         return ""
+    
+    # إعدادات إضافية لتحسين التشكيل
+    arabic_reshaper.config.forget_letters = True
+    arabic_reshaper.config.language = 'Arabic'
+    
     reshaped = arabic_reshaper.reshape(text)
     return get_display(reshaped)
 
@@ -53,13 +59,23 @@ def add_text_to_image(image, name, job, image_name):
     try:
         img = image.copy()
         draw = ImageDraw.Draw(img)
-
-        # استخدام خط مناسب للعربية
+        
+        # حساب حجم الخط ديناميكياً بناءً على حجم الصورة
+        base_font_size = int(img.height / 8)  # يمكن تعديل القيمة حسب الحاجة
+        
+        # استخدام خط عربي مخصص (يجب توفير ملف الخط)
         try:
-            font = ImageFont.truetype("arial.ttf", 800)
-        except:
-            font = ImageFont.load_default()
-            font.size=800
+            font_path = "fonts/NotoNaskhArabic-Regular.ttf"  # أو أي خط عربي آخر
+            font = ImageFont.truetype(font_path, base_font_size)
+        except Exception as e:
+            st.warning(f"خطأ في تحميل الخط العربي: {e}")
+            try:
+                font = ImageFont.truetype("arial.ttf", base_font_size)
+            except:
+                font = ImageFont.load_default()
+                font.size = base_font_size
+
+        # بقية الكود...
 
         # تحضير النصوص
         name_text = prepare_arabic_text(name)

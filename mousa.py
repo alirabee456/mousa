@@ -48,10 +48,11 @@ def audio_autoplay(sound_file):
 # دالة لتحميل خط يدعم العربية تلقائيًا
 def load_arabic_font(font_size=100):
     font_paths = [
+        "Amiri-Bold.ttf",  # خط أميري بولد (مخصص)
+        "C:\\Windows\\Fonts\\arialbd.ttf",  # Arial Bold - Windows
         "C:\\Windows\\Fonts\\trado.ttf",  # Traditional Arabic - Windows
-        "C:\\Windows\\Fonts\\arial.ttf",  # Arial - Windows
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
-        "/System/Library/Fonts/Supplemental/Arial.ttf",  # macOS
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",  # macOS
     ]
     for path in font_paths:
         if os.path.exists(path):
@@ -59,8 +60,9 @@ def load_arabic_font(font_size=100):
                 return ImageFont.truetype(path, font_size)
             except:
                 continue
-    st.warning("تعذر تحميل خط عربي. سيتم استخدام الخط الافتراضي.")
+    st.warning("تعذر تحميل خط عربي عريض. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()
+
 
 # دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):

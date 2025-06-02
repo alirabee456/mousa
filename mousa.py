@@ -45,14 +45,33 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-from urllib.request import urlopen
-from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
+from arabic_reshaper import reshape
+from bidi.algorithm import get_display
 
-def load_arabic_font(font_size=100):
+def create_arabic_image(text, output_path):
+    # إنشاء الصورة
+    img = Image.new("RGB", (800, 600), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    
+    # معالجة النص العربي
+    reshaped = reshape(text)
+    bidi_text = get_display(reshaped)
+    
+    # تحميل الخط
     try:
-        return ImageFont.truetype("Cairo-Bold.ttf", font_size)
+        font = ImageFont.truetype("arial.ttf", 40)
     except:
-        return ImageFont.load_default()
+        font = ImageFont.load_default()
+    
+    # رسم النص
+    draw.text((50, 50), bidi_text, font=font, fill=(0, 0, 0))
+    
+    # حفظ الصورة
+    img.save(output_path)
+
+# استخدام المثال
+create_arabic_image("نص تجريبي باللغة العربية", "output.png")
 # دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):
     try:

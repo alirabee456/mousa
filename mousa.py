@@ -46,21 +46,32 @@ def audio_autoplay(sound_file):
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
 # دالة لتحميل خط يدعم العربية تلقائيًا
-def load_arabic_font(font_size=100):
+from PIL import ImageFont
+import os
+import streamlit as st
+
+def load_arabic_font(font_size=40, bold=False):
+    """
+    تحميل خط Arial أو Arial Bold حسب الاختيار.
+    """
     font_paths = [
-        "Ruqah.ttf",  # خط رقعة - تأكد من وجوده بجانب الكود
-        "KFGQPC Raqaa.ttf",  # إن كان اسمه مختلفًا
-        "C:\\Windows\\Fonts\\trado.ttf",  # Traditional Arabic
-        "Amiri-Bold.ttf",  # Amiri Bold
+        "C:\\Windows\\Fonts\\arialbd.ttf" if bold else "C:\\Windows\\Fonts\\arial.ttf",  # Windows
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf" if bold else "/System/Library/Fonts/Supplemental/Arial.ttf",  # macOS
+        "/usr/share/fonts/truetype/msttcorefonts/Arial_Bold.ttf" if bold else "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf",  # Linux بعض التوزيعات
+        "arialbd.ttf" if bold else "arial.ttf",  # fallback لو كان الخط في نفس مجلد المشروع
     ]
+    
     for path in font_paths:
         if os.path.exists(path):
             try:
                 return ImageFont.truetype(path, font_size)
-            except:
+            except Exception as e:
+                st.warning(f"تعذر تحميل الخط من: {path} ({e})")
                 continue
-    st.warning("تعذر تحميل خط رقعة. سيتم استخدام الخط الافتراضي.")
+
+    st.warning("تعذر تحميل خط Arial. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()
+
 
 
 

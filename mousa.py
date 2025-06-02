@@ -22,27 +22,6 @@ if 'show_balloons' not in st.session_state:
 if 'play_audio' not in st.session_state:
     st.session_state.play_audio = False
 
-# دالة لحقن خط Cairo في واجهة Streamlit
-def inject_custom_font():
-    font_path = "fonts/Cairo-Bold.ttf"
-    if os.path.exists(font_path):
-        with open(font_path, "rb") as f:
-            encoded_font = base64.b64encode(f.read()).decode()
-        css = f"""
-        <style>
-        @font-face {{
-            font-family: 'Cairo';
-            src: url(data:font/ttf;base64,{encoded_font}) format('truetype');
-        }}
-        html, body, [class*="css"] {{
-            font-family: 'Cairo', sans-serif !important;
-        }}
-        </style>
-        """
-        st.markdown(css, unsafe_allow_html=True)
-    else:
-        st.warning("\u26a0\ufe0f لم يتم العثور على ملف الخط 'Cairo-Bold.ttf'.")
-
 # دالة لمعالجة النصوص العربية
 def prepare_arabic_text(text):
     if not text.strip():
@@ -66,27 +45,32 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-# دالة لتحميل الخط العربي
 
 def load_arabic_font(font_size=100):
     font_paths = [
-        "Cairo-Bold.ttf",
-        "Amiri-Bold.ttf",
-        "C:\\Windows\\Fonts\\arialbd.ttf",
-        "C:\\Windows\\Fonts\\trado.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+        "fonts/Cairo-Bold.ttf",               # أفضل خط عربي مخصص
+        "Amiri-Bold.ttf",              # بديل أنيق
+        "C:\\Windows\\Fonts\\arialbd.ttf",  # Arial Bold - Windows
+        "C:\\Windows\\Fonts\\trado.ttf",    # Traditional Arabic - Windows
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",     # macOS
     ]
     for path in font_paths:
         if os.path.exists(path):
             try:
                 return ImageFont.truetype(path, font_size)
-            except Exception:
+            except Exception as e:
                 continue
     st.warning("تعذر تحميل خط عربي عريض. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()
 
-# دالة لإضافة النص للصورة
+
+
+
+
+
+
+# دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):
     try:
         img = image.copy()
@@ -97,6 +81,7 @@ def add_text_to_image(image, name, job, image_name):
         job_text = prepare_arabic_text(job)
 
         img_width, img_height = img.size
+
         name_bbox = draw.textbbox((0, 0), name_text, font=font)
         job_bbox = draw.textbbox((0, 0), job_text, font=font)
 
@@ -106,12 +91,14 @@ def add_text_to_image(image, name, job, image_name):
         job_height = job_bbox[3] - job_bbox[1]
 
         spacing = 20
+
         padding_values = {
             "M1.jpg": 1200,
             "M2.jpg": 940,
             "M5.jpg": 570,
             "M4.jpg": 700
         }
+
         top_padding = padding_values.get(image_name, 570)
 
         name_x = (img_width - name_width) // 2
@@ -128,10 +115,11 @@ def add_text_to_image(image, name, job, image_name):
         st.error(f"حدث خطأ أثناء إضافة النص: {str(e)}")
         return image
 
+# قائمة الصور
 IMAGE_FILES = ["M1.jpg", "M2.jpg", "M5.jpg", "M4.jpg"]
 
+# الصفحة الرئيسية
 def main_page():
-    inject_custom_font()
     st.title("تهنئة الحج 🕋")
     st.markdown("""
     <div style='text-align: left; font-size: 1.2rem;'>
@@ -149,8 +137,8 @@ def main_page():
         st.session_state.play_audio = True
         st.rerun()
 
+# صفحة إنشاء التهنئة
 def create_page():
-    inject_custom_font()
     if st.session_state.get('play_audio', False):
         audio_autoplay("aud.mp3")
 
@@ -163,8 +151,8 @@ def create_page():
         st.session_state.job = st.text_input('ادخل وظيفتك', value=st.session_state.job)
 
     st.subheader("اختر تصميم التهنئة")
-    cols = st.columns(4)
 
+    cols = st.columns(4)
     for i, img_file in enumerate(IMAGE_FILES):
         try:
             img = Image.open(img_file)
@@ -214,6 +202,7 @@ def create_page():
         st.session_state.selected_image = None
         st.rerun()
 
+# عرض الصفحة المناسبة
 if st.session_state.show_new_page:
     create_page()
 else:

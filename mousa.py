@@ -45,28 +45,18 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-import os
-from PIL import ImageFont
-import streamlit as st
+import requests
+from io import BytesIO
 
 def load_arabic_font(font_size=100):
-    font_paths = [
-        "fonts/Tajawal-Bold.ttf",             # خط سعودي أنيق
-        "C:\\Windows\\Fonts\\arialbd.ttf",    # بديل على Windows
-        "C:\\Windows\\Fonts\\trado.ttf",      # Traditional Arabic
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
-        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",     # macOS
-    ]
-    for path in font_paths:
-        if os.path.exists(path):
-            try:
-                return ImageFont.truetype(path, font_size)
-            except Exception:
-                continue
-    st.warning("⚠️ لم يتم العثور على الخط العربي. سيتم استخدام الخط الافتراضي.")
-    return ImageFont.load_default()
-
-    
+    try:
+        url = "https://github.com/google/fonts/raw/main/ofl/cairo/Cairo-Bold.ttf"
+        response = requests.get(url)
+        font = ImageFont.truetype(BytesIO(response.content), font_size)
+        return font
+    except:
+        st.error("تعذر تحميل الخط من الإنترنت!")
+        return ImageFont.load_default()
 
 # دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):

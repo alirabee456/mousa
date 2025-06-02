@@ -47,30 +47,23 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-
-def load_arabic_font(font_size=40):
+def load_arabic_font(font_size=100):
     font_paths = [
-        "arial.ttf",  # ويندوز
-        "arialbd.ttf",  # ويندوز
-        "trado.ttf",  # Traditional Arabic - Windows
-        "/usr/share/fonts/truetype/arabtype/ArabType.ttf",  # لينكس
-        "/System/Library/Fonts/Supplemental/Arial.ttf",  # ماك
-        "/System/Library/Fonts/Supplemental/Arial Bold.ttf"  # ماك
+        "fonts/Cairo.ttf",               # أفضل خط عربي مخصص
+                      # بديل أنيق
+        "C:\\Windows\\Fonts\\arialbd.ttf",  # Arial Bold - Windows
+        "C:\\Windows\\Fonts\\trado.ttf",    # Traditional Arabic - Windows
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",     # macOS
     ]
-
     for path in font_paths:
-        try:
-            if os.path.exists(path):
+        if os.path.exists(path):
+            try:
                 return ImageFont.truetype(path, font_size)
-        except:
-            continue
-
-    # إذا فشل كل شيء، جرب تحميل خط افتراضي
-    try:
-        return ImageFont.truetype("arial", font_size)
-    except:
-        return ImageFont.load_default()
-
+            except Exception as e:
+                continue
+    st.warning("تعذر تحميل خط عربي عريض. سيتم استخدام الخط الافتراضي.")
+    return ImageFont.load_default()
 
 # دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):

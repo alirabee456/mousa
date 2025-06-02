@@ -45,24 +45,46 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
+import os
+from PIL import ImageFont
+import streamlit as st
+
 def load_arabic_font(font_size=100):
+    # قائمة مسارات الخطوط مع الأولوية لـ Cairo-Bold
     font_paths = [
-        "fonts/Cairo-Bold.ttf",               # أفضل خط عربي مخصص
-        "Amiri-Bold.ttf",              # بديل أنيق
+        "fonts/Cairo-Bold.ttf",  # المسار الأساسي المفضل
+        "Cairo-Bold.ttf",        # قد يكون في نفس مجلد العمل
         "C:\\Windows\\Fonts\\arialbd.ttf",  # Arial Bold - Windows
         "C:\\Windows\\Fonts\\trado.ttf",    # Traditional Arabic - Windows
+        "/usr/share/fonts/truetype/cairo/Cairo-Bold.ttf",  # مسار محتمل على لينكس
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
         "/System/Library/Fonts/Supplemental/Arial Bold.ttf",     # macOS
     ]
+    
+    # حاول أولاً تحميل Cairo-Bold من مجلد 'fonts' أو المسارات المباشرة
+    preferred_paths = [
+        "fonts/Cairo-Bold.ttf",
+        "Cairo-Bold.ttf",
+        "/usr/share/fonts/truetype/cairo/Cairo-Bold.ttf",
+    ]
+    
+    for path in preferred_paths:
+        if os.path.exists(path):
+            try:
+                return ImageFont.truetype(path, font_size)
+            except Exception as e:
+                continue
+    
+    # إذا فشل، جرب باقي الخطوط كبدائل
     for path in font_paths:
         if os.path.exists(path):
             try:
                 return ImageFont.truetype(path, font_size)
             except Exception as e:
                 continue
-    st.warning("تعذر تحميل خط عربي عريض. سيتم استخدام الخط الافتراضي.")
+    
+    st.warning("تعذر تحميل خط Cairo-Bold أو أي بديل عربي. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()
-
 
 # دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):

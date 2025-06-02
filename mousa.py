@@ -45,24 +45,16 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-import os
-import requests
-def download_tajawal_font():
-    url = "https://github.com/original-git/fonts/blob/main/arabic/Tajawal/Tajawal-Bold.ttf?raw=true"
-    font_path = "fonts/Tajawal-Bold.ttf"
-    os.makedirs("fonts", exist_ok=True)
-    if not os.path.exists(font_path):
-        response = requests.get(url)
-        with open(font_path, "wb") as f:
-            f.write(response.content)
 
 def load_arabic_font(font_size=100):
-    download_tajawal_font()
+    download_cairo_font()  # Ensure the font is downloaded
     font_paths = [
-        "fonts/Tajawal-Bold.ttf",
         "fonts/Cairo-Bold.ttf",
+        "Amiri-Bold.ttf",
+        "C:\\Windows\\Fonts\\arialbd.ttf",
         "C:\\Windows\\Fonts\\trado.ttf",
-        "C:\\Windows\\Fonts\\arialbd.ttf"
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
     ]
     for path in font_paths:
         if os.path.exists(path):
@@ -70,6 +62,7 @@ def load_arabic_font(font_size=100):
                 return ImageFont.truetype(path, font_size)
             except:
                 continue
+    st.warning("تعذر تحميل خط عربي. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()
 
 

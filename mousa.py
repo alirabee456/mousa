@@ -45,7 +45,8 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-
+import os
+import requests
 def download_tajawal_font():
     url = "https://github.com/original-git/fonts/blob/main/arabic/Tajawal/Tajawal-Bold.ttf?raw=true"
     font_path = "fonts/Tajawal-Bold.ttf"

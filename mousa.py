@@ -48,10 +48,10 @@ def audio_autoplay(sound_file):
 
 def load_arabic_font(font_size=100):
     font_paths = [
-        "C:\\Windows\\Fonts\\trado.ttf",        # Traditional Arabic - Windows
-        "Amiri-Bold.ttf",                       # Amiri Bold (ضعه بجانب الكود)
-        "Cairo-Bold.ttf",                       # Cairo Bold (بديل عصري)
-        "C:\\Windows\\Fonts\\arialbd.ttf",      # Arial Bold - Windows
+        "Cairo-Bold.ttf",               # أفضل خط عربي مخصص
+        "Amiri-Bold.ttf",              # بديل أنيق
+        "C:\\Windows\\Fonts\\arialbd.ttf",  # Arial Bold - Windows
+        "C:\\Windows\\Fonts\\trado.ttf",    # Traditional Arabic - Windows
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
         "/System/Library/Fonts/Supplemental/Arial Bold.ttf",     # macOS
     ]
@@ -59,13 +59,11 @@ def load_arabic_font(font_size=100):
         if os.path.exists(path):
             try:
                 return ImageFont.truetype(path, font_size)
-            except:
+            except Exception as e:
                 continue
     st.warning("تعذر تحميل خط عربي عريض. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()
 
-    st.warning("تعذر تحميل خط Arial. سيتم استخدام الخط الافتراضي.")
-    return ImageFont.load_default()
 
 
 

@@ -45,28 +45,23 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-
 def load_arabic_font(font_size=100):
     font_paths = [
-        "fonts/calibri.ttf",                   # نسخة محلية من Calibri
-        "fonts/calibrib.ttf",                  # النسخة العريضة إذا أردتها
-        "C:\\Windows\\Fonts\\calibri.ttf",     # موقع الخط في Windows
-        "C:\\Windows\\Fonts\\calibrib.ttf",    # Calibri Bold
+        "fonts/Cairo-Bold.ttf",               # أفضل خط عربي مخصص
+        "Amiri-Bold.ttf",              # بديل أنيق
+        "C:\\Windows\\Fonts\\arialbd.ttf",  # Arial Bold - Windows
+        "C:\\Windows\\Fonts\\trado.ttf",    # Traditional Arabic - Windows
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",     # macOS
     ]
     for path in font_paths:
         if os.path.exists(path):
             try:
                 return ImageFont.truetype(path, font_size)
-            except Exception:
+            except Exception as e:
                 continue
-    st.warning("⚠️ لم يتم العثور على خط Calibri. سيتم استخدام الخط الافتراضي.")
+    st.warning("تعذر تحميل خط عربي عريض. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()
-
-
-
-
-
-
 
 
 # دالة لتنسيق النص على الصورة

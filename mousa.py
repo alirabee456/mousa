@@ -45,29 +45,24 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-# دالة لتحميل خط يدعم العربية تلقائيًا
-from PIL import ImageFont
-import os
-import streamlit as st
 
-def load_arabic_font(font_size=40, bold=False):
-    """
-    تحميل خط Arial أو Arial Bold حسب الاختيار.
-    """
+def load_arabic_font(font_size=100):
     font_paths = [
-        "C:\\Windows\\Fonts\\arialbd.ttf" if bold else "C:\\Windows\\Fonts\\arial.ttf",  # Windows
-        "/System/Library/Fonts/Supplemental/Arial Bold.ttf" if bold else "/System/Library/Fonts/Supplemental/Arial.ttf",  # macOS
-        "/usr/share/fonts/truetype/msttcorefonts/Arial_Bold.ttf" if bold else "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf",  # Linux بعض التوزيعات
-        "arialbd.ttf" if bold else "arial.ttf",  # fallback لو كان الخط في نفس مجلد المشروع
+        "C:\\Windows\\Fonts\\trado.ttf",        # Traditional Arabic - Windows
+        "Amiri-Bold.ttf",                       # Amiri Bold (ضعه بجانب الكود)
+        "Cairo-Bold.ttf",                       # Cairo Bold (بديل عصري)
+        "C:\\Windows\\Fonts\\arialbd.ttf",      # Arial Bold - Windows
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",     # macOS
     ]
-    
     for path in font_paths:
         if os.path.exists(path):
             try:
                 return ImageFont.truetype(path, font_size)
-            except Exception as e:
-                st.warning(f"تعذر تحميل الخط من: {path} ({e})")
+            except:
                 continue
+    st.warning("تعذر تحميل خط عربي عريض. سيتم استخدام الخط الافتراضي.")
+    return ImageFont.load_default()
 
     st.warning("تعذر تحميل خط Arial. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()

@@ -48,9 +48,10 @@ def audio_autoplay(sound_file):
 
 def load_arabic_font(font_size=100):
     font_paths = [
-        "C:\\Windows\\Fonts\\calibri.ttf",   # مسار الخط Calibri في ويندوز
-        "/System/Library/Fonts/Calibri.ttf", # مسار تقريبي في macOS إن وُجد
-        "/usr/share/fonts/truetype/msttcorefonts/calibri.ttf",  # مسار شائع في Linux بعد تثبيت خطوط Microsoft
+        "fonts/calibri.ttf",                   # نسخة محلية من Calibri
+        "fonts/calibrib.ttf",                  # النسخة العريضة إذا أردتها
+        "C:\\Windows\\Fonts\\calibri.ttf",     # موقع الخط في Windows
+        "C:\\Windows\\Fonts\\calibrib.ttf",    # Calibri Bold
     ]
     for path in font_paths:
         if os.path.exists(path):

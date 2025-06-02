@@ -49,7 +49,7 @@ def audio_autoplay(sound_file):
 def load_arabic_font(font_size=100):
     font_paths = [
         "Cairo-Bold.ttf",               # أفضل خط عربي مخصص
-        "Amiri-Bold.ttf",              # بديل أنيق
+                      # بديل أنيق
         "C:\\Windows\\Fonts\\arialbd.ttf",  # Arial Bold - Windows
         "C:\\Windows\\Fonts\\trado.ttf",    # Traditional Arabic - Windows
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",  # Linux

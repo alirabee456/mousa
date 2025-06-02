@@ -46,12 +46,9 @@ def audio_autoplay(sound_file):
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
 
-import os
-import requests
-
-def download_cairo_font():
-    url = "https://github.com/Gue3bara/Cairo/blob/master/fonts/ttf/Cairo-Bold.ttf?raw=true"
-    font_path = "fonts/Cairo-Bold.ttf"
+def download_tajawal_font():
+    url = "https://github.com/original-git/fonts/blob/main/arabic/Tajawal/Tajawal-Bold.ttf?raw=true"
+    font_path = "fonts/Tajawal-Bold.ttf"
     os.makedirs("fonts", exist_ok=True)
     if not os.path.exists(font_path):
         response = requests.get(url)
@@ -59,14 +56,12 @@ def download_cairo_font():
             f.write(response.content)
 
 def load_arabic_font(font_size=100):
-    download_cairo_font()  # Ensure the font is downloaded
+    download_tajawal_font()
     font_paths = [
+        "fonts/Tajawal-Bold.ttf",
         "fonts/Cairo-Bold.ttf",
-        "Amiri-Bold.ttf",
-        "C:\\Windows\\Fonts\\arialbd.ttf",
         "C:\\Windows\\Fonts\\trado.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+        "C:\\Windows\\Fonts\\arialbd.ttf"
     ]
     for path in font_paths:
         if os.path.exists(path):
@@ -74,7 +69,6 @@ def load_arabic_font(font_size=100):
                 return ImageFont.truetype(path, font_size)
             except:
                 continue
-    st.warning("تعذر تحميل خط عربي. سيتم استخدام الخط الافتراضي.")
     return ImageFont.load_default()
 
 

@@ -22,12 +22,14 @@ if 'show_balloons' not in st.session_state:
 if 'play_audio' not in st.session_state:
     st.session_state.play_audio = False
 
+
 # دالة لمعالجة النصوص العربية
 def prepare_arabic_text(text):
     if not text.strip():
         return ""
     reshaped = arabic_reshaper.reshape(text)
     return get_display(reshaped)
+
 
 # دالة لتشغيل الصوت باستخدام HTML5
 def audio_autoplay(sound_file):
@@ -45,33 +47,31 @@ def audio_autoplay(sound_file):
     except Exception as e:
         st.warning(f"لا يمكن تشغيل الصوت: {e}")
 
-from PIL import Image, ImageDraw, ImageFont
-from arabic_reshaper import reshape
-from bidi.algorithm import get_display
 
-def create_arabic_image(text, output_path):
-    # إنشاء الصورة
-    img = Image.new("RGB", (800, 600), (255, 255, 255))
-    draw = ImageDraw.Draw(img)
-    
-    # معالجة النص العربي
-    reshaped = reshape(text)
-    bidi_text = get_display(reshaped)
-    
-    # تحميل الخط
+def load_arabic_font(font_size=40):
+    font_paths = [
+        "arial.ttf",  # ويندوز
+        "arialbd.ttf",  # ويندوز
+        "trado.ttf",  # Traditional Arabic - Windows
+        "/usr/share/fonts/truetype/arabtype/ArabType.ttf",  # لينكس
+        "/System/Library/Fonts/Supplemental/Arial.ttf",  # ماك
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf"  # ماك
+    ]
+
+    for path in font_paths:
+        try:
+            if os.path.exists(path):
+                return ImageFont.truetype(path, font_size)
+        except:
+            continue
+
+    # إذا فشل كل شيء، جرب تحميل خط افتراضي
     try:
-        font = ImageFont.truetype("arial.ttf", 40)
+        return ImageFont.truetype("arial", font_size)
     except:
-        font = ImageFont.load_default()
-    
-    # رسم النص
-    draw.text((50, 50), bidi_text, font=font, fill=(0, 0, 0))
-    
-    # حفظ الصورة
-    img.save(output_path)
+        return ImageFont.load_default()
 
-# استخدام المثال
-create_arabic_image("نص تجريبي باللغة العربية", "output.png")
+
 # دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):
     try:
@@ -84,6 +84,7 @@ def add_text_to_image(image, name, job, image_name):
 
         img_width, img_height = img.size
 
+        # حساب مساحة النص
         name_bbox = draw.textbbox((0, 0), name_text, font=font)
         job_bbox = draw.textbbox((0, 0), job_text, font=font)
 
@@ -94,11 +95,14 @@ def add_text_to_image(image, name, job, image_name):
 
         spacing = 20
 
+        # قيم الحشو لكل صورة
         padding_values = {
             "M1.jpg": 1200,
             "M2.jpg": 940,
             "M5.jpg": 570,
-            "M4.jpg": 700
+            "M4.jpg": 700,
+            "M6.jpg": 620,
+            "M7.jpg": 550
         }
 
         top_padding = padding_values.get(image_name, 570)
@@ -108,6 +112,12 @@ def add_text_to_image(image, name, job, image_name):
         job_x = (img_width - job_width) // 2
         job_y = name_y + name_height + spacing
 
+        # إضافة ظل للنص لتحسين القراءة
+        shadow_offset = 2
+        draw.text((name_x + shadow_offset, name_y + shadow_offset), name_text, font=font, fill="gray")
+        draw.text((job_x + shadow_offset, job_y + shadow_offset), job_text, font=font, fill="gray")
+
+        # إضافة النص الأساسي
         draw.text((name_x, name_y), name_text, font=font, fill="black")
         draw.text((job_x, job_y), job_text, font=font, fill="black")
 
@@ -117,8 +127,10 @@ def add_text_to_image(image, name, job, image_name):
         st.error(f"حدث خطأ أثناء إضافة النص: {str(e)}")
         return image
 
+
 # قائمة الصور
-IMAGE_FILES = ["M1.jpg", "M2.jpg", "M5.jpg", "M4.jpg"]
+IMAGE_FILES = ["M1.jpg", "M2.jpg", "M5.jpg", "M4.jpg", "M6.jpg", "M7.jpg"]
+
 
 # الصفحة الرئيسية
 def main_page():
@@ -139,6 +151,7 @@ def main_page():
         st.session_state.play_audio = True
         st.rerun()
 
+
 # صفحة إنشاء التهنئة
 def create_page():
     if st.session_state.get('play_audio', False):
@@ -154,18 +167,19 @@ def create_page():
 
     st.subheader("اختر تصميم التهنئة")
 
-    cols = st.columns(4)
+    # عرض الصور في 3 أعمدة (2 صورة في كل عمود)
+    cols = st.columns(3)
     for i, img_file in enumerate(IMAGE_FILES):
         try:
             img = Image.open(img_file)
-            with cols[i]:
+            with cols[i % 3]:  # توزيع الصور على 3 أعمدة
                 if st.session_state.name and st.session_state.job:
                     final_img = add_text_to_image(img, st.session_state.name, st.session_state.job, img_file)
                     st.image(final_img, caption=f"تصميم {i + 1}", use_container_width=True)
                 else:
                     st.image(img, caption=f"تصميم {i + 1}", use_container_width=True)
 
-                if st.button(f"اختر تصميم {i + 1}"):
+                if st.button(f"اختر تصميم {i + 1}", key=f"btn_{i}"):
                     st.session_state.selected_image = img_file
                     st.success(f"تم اختيار التصميم {i + 1}")
                     st.session_state.final_image = add_text_to_image(
@@ -203,6 +217,7 @@ def create_page():
         st.session_state.show_new_page = False
         st.session_state.selected_image = None
         st.rerun()
+
 
 # عرض الصفحة المناسبة
 if st.session_state.show_new_page:

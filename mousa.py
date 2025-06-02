@@ -70,7 +70,7 @@ def audio_autoplay(sound_file):
 
 def load_arabic_font(font_size=100):
     font_paths = [
-        "fonts/Cairo-Bold.ttf",
+        "Cairo-Bold.ttf",
         "Amiri-Bold.ttf",
         "C:\\Windows\\Fonts\\arialbd.ttf",
         "C:\\Windows\\Fonts\\trado.ttf",

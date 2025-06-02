@@ -47,15 +47,17 @@ def audio_autoplay(sound_file):
 
 import requests
 from io import BytesIO
+from urllib.request import urlopen
+from io import BytesIO
 
 def load_arabic_font(font_size=100):
     try:
         url = "https://github.com/google/fonts/raw/main/ofl/cairo/Cairo-Bold.ttf"
-        response = requests.get(url)
-        font = ImageFont.truetype(BytesIO(response.content), font_size)
-        return font
-    except:
-        st.error("تعذر تحميل الخط من الإنترنت!")
+        response = urlopen(url)
+        font_data = BytesIO(response.read())
+        return ImageFont.truetype(font_data, font_size)
+    except Exception as e:
+        st.error(f"خطأ في التحميل: {e}")
         return ImageFont.load_default()
 
 # دالة لتنسيق النص على الصورة

@@ -123,8 +123,7 @@ def main_page():
     st.title("تهنئة الحج 🕋")
     st.markdown("""
     <div style='text-align: left; font-size: 1.2rem;'>
-    تصميم وبرمجة علي ربيع     <br>
-    للتواصل واتساب  01281022796
+    تصميم وبرمجة علي ربيع     <br>  
     </div>
     """, unsafe_allow_html=True)
 

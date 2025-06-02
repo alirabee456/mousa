@@ -50,18 +50,8 @@ from io import BytesIO
 
 def load_arabic_font(font_size=100):
     try:
-        # رابط جديد من Google Fonts (مباشر لملف الخط)
-        url = "https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap"
-        
-        # نطلب الملف من Google Fonts
-        response = urlopen(url)
-        font_url = response.read().decode('utf-8').split('url(')[1].split(')')[0]
-        
-        # نحمّل ملف الخط الفعلي
-        font_data = BytesIO(urlopen(font_url).read())
-        return ImageFont.truetype(font_data, font_size)
-    except Exception as e:
-        print(f"Error: {e}")
+        return ImageFont.truetype("Cairo-Bold.ttf", font_size)
+    except:
         return ImageFont.load_default()
 # دالة لتنسيق النص على الصورة
 def add_text_to_image(image, name, job, image_name):
